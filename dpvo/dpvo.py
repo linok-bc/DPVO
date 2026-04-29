@@ -431,6 +431,17 @@ class DPVO:
 
         self.pg.patches_[self.n] = patches
 
+        if self.viewer is None:  # only if not using DPViewer
+            import cv2
+            img_np = (image[0,0].permute(1,2,0).cpu().numpy() + 0.5) * (255/2)
+            img_np = img_np.astype('uint8').copy()
+            # patch centers in feature coords -> image coords
+            centers = patches[0, :, :2, 1, 1].cpu().numpy() * self.RES
+            for (x, y) in centers:
+                cv2.circle(img_np, (int(x), int(y)), 2, (0, 255, 0), -1)
+            cv2.imshow('tracked patches', img_np)
+            cv2.waitKey(1)
+
         ### update network attributes ###
         self.imap_[self.n % self.pmem] = imap.squeeze()
         self.gmap_[self.n % self.pmem] = gmap.squeeze()
